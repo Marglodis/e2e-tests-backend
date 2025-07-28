@@ -1,0 +1,11 @@
+# Variables sensibles
+environments/*.json
+!environments/test-env.json
+
+# Reportes
+reports/*
+!reports/.gitkeep
+*.html
+# Node modules
+node_modules/
+npm-debug.log

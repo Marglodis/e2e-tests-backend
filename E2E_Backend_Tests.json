@@ -1,0 +1,954 @@
+{
+	"info": {
+		"_postman_id": "d5e543e9-ba1e-470c-9fce-109cc70952d2",
+		"name": "E2E_Backend_Tests",
+		"description": "# 🚀 Pruebas E2E - API de Gestión de Clientes\n\nEsta colección está diseñada para realizar pruebas **End-to-End (E2E)** sobre la API de gestión de clientes, validando todos los endpoints críticos, flujos de autenticación, operaciones CRUD y casos de error.\n\n## 🔖 Cómo usar esta colección\n\n### Paso 1: Configurar el entorno\n\n1. Crea o importa un entorno en Postman (ej: `Test Environment`).\n    \n2. Asegúrate de que contenga las variables:\n    \n    - `base_url`: URL base de la API (ej: `https://api-tester-adl.leonardojose.dev`)\n        \n    - `jwt_token`: (se genera automáticamente al hacer login)\n        \n    - `client_id`: (se guarda tras crear un cliente)\n        \n3. Selecciona el entorno en la esquina superior derecha.\n    \n\n### Paso 2: Ejecutar las pruebas\n\n- Abre cada solicitud y haz clic en **\"Send\"** para probarla individualmente.\n    \n- O usa el **Postman Runner** para ejecutar toda la colección en orden.\n    \n\n### Paso 3: Flujo recomendado\n\nLa colección sigue un orden lógico:\n\n1. **Autenticación** → obtiene el token JWT.\n    \n2. **Crear cliente** → registra un nuevo cliente.\n    \n3. **Listar clientes** → verifica que el cliente existe.\n    \n4. **Actualizar cliente** → modifica datos.\n    \n5. **Eliminar cliente** → limpia los datos de prueba.\n    \n6. **Validaciones** → prueba errores (campos faltantes, duplicados, etc.).\n    \n\n---\n\n## 🧪 Endpoints cubiertos\n\n| Endpoint | Método | Descripción |\n| --- | --- | --- |\n| `/api/login` | `POST` | Autenticación con email y contraseña |\n| `/api/clients` | `GET` | Listar todos los clientes |\n| `/api/clients` | `POST` | Crear un nuevo cliente |\n| `/api/clients/:id` | `PUT` | Actualizar un cliente existente |\n| `/api/clients/:id` | `DELETE` | Eliminar un cliente |\n\n---\n\n## 🔐 Autenticación\n\nTodos los endpoints (excepto `/login`) requieren un token JWT en el header:\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24996039"
+	},
+	"item": [
+		{
+			"name": "Clients",
+			"item": [
+				{
+					"name": "Auth",
+					"item": [
+						{
+							"name": "Autenticación - Invalid credentials",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 401 - Unauthorized\", () => pm.response.to.have.status(401));\r",
+											"pm.test(\"Error message\", ()=>{\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.message).to.eql(\"Las credenciales proporcionadas son incorrectas.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"wrong@adl.com\",\r\n  \"password\": \"wrong\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Autenticación - Missing email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422\", ()=> pm.response.to.have.status(422));\r",
+											"pm.test(\"Missing email error\", ()=>{\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.errors.email[0]).to.eql(\"The email field is required.\");\r",
+											"})"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"password\": \"testerEngineer\"\r\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Autenticación - Missing password",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 422\", ()=> pm.response.to.have.status(422));\r",
+											"pm.test(\"Missing password error\", ()=>{\r",
+											"    const response = pm.response.json();\r",
+											"    pm.expect(response.errors.password[0]).to.eql(\"The password field is required.\");\r",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"tester@adl.com\"\r\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Autenticación - Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											"\r",
+											"pm.test(\"Response has token\", function () {\r",
+											"    const jsonResponse = pm.response.json();\r",
+											"    pm.expect(jsonResponse.access_token).to.exist;\r",
+											"});\r",
+											"\r",
+											"const token = pm.response.json().access_token;\r",
+											"pm.environment.set(\"jwt_token\", token);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"tester@adl.com\",\n  \"password\": \"testerEngineer\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GET",
+					"item": [
+						{
+							"name": "Get clients - Unauthorized",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 401\", function () {",
+											"    pm.response.to.have.status(401);",
+											"});",
+											"",
+											"pm.test(\"Response body contains 'No autenticado.'\", function () {",
+											"    pm.expect(pm.response.text()).to.include('No autenticado.');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+							},
+							"response": []
+						},
+						{
+							"name": "Get clients - Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"pm.test(\"Response is an array\", function () {",
+											"    const clients = pm.response.json();",
+											"    pm.expect(clients).to.be.an('array');",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "POST",
+					"item": [
+						{
+							"name": "Post clients - Missing name",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400\", () =>{",
+											"    pm.response.to.have.status(400);",
+											"});",
+											"pm.test(\"Name required\", ()=>{",
+											"    const response = pm.response.json();",
+											"    pm.expect(response.errors).to.include(\"name is required\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"cuit\": \"20-22345678-3\",\n    \"email\": \"juan.perez.orta@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Av. Corrientes 1234, Buenos Aires, Argentina\",\n    \"balance\": 15230.75\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Post clients - Duplicate email",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 409 - Conflict\", () =>{",
+											"    pm.response.to.have.status(409);",
+											"});",
+											"pm.test(\"Duplicate email error\", ()=>{",
+											"    const response = pm.response.json();",
+											"    pm.expect(response.errors).to.include(\"Cuit duplicado.\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Juan Pérez Arriba\",\n    \"cuit\": \"20-22345678-9\",\n    \"email\": \"juan.perez.arriba@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Av. Corrientes 1234, Buenos Aires, Argentina\",\n    \"balance\": 15230.75\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Post clients - Campos NULL",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 400 - Bad Request attributes NULL\", () => {",
+											"    pm.response.to.have.status(400);",
+											"",
+											"    const res = pm.response.json();",
+											"",
+											"    pm.expect(res).to.have.property(\"errors\");",
+											"    pm.expect(res.errors).to.have.property(\"name\");",
+											"    pm.expect(res.errors).to.have.property(\"email\");",
+											"    pm.expect(res.errors).to.have.property(\"balance\");",
+											"    pm.expect(res.errors).to.have.property(\"cuit\");",
+											"    pm.expect(res.errors.name[0]).to.include(\"no puede ser nulo\");",
+											"    pm.expect(res.errors.email[0]).to.include(\"no puede ser nulo\");",
+											"    pm.expect(res.errors.balance[0]).to.include(\"no puede ser nulo\");",
+											"    pm.expect(res.errors.cuit[0]).to.include(\"no puede ser nulo\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": null,\n    \"cuit\": null,\n    \"email\": null,\n    \"phone\": null,\n    \"address\": null,\n    \"balance\": null\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Post clients - Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+											"});",
+											"const response = pm.response.json();",
+											"pm.test(\"Response body contains 'id' ans is a number\", function () {",
+											"    pm.expect(response).to.have.property('id');",
+											"    pm.expect(response.id).to.be.a('number');",
+											"});",
+											"",
+											"pm.environment.set(\"client_id\", response.id);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Juan Pérez Arriba\",\n    \"cuit\": \"21-22345678-7\",\n    \"email\": \"juan.perez.test2@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Av. Corrientes 1234, Buenos Aires, Argentina\",\n    \"balance\": 15230.75\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients"
+									]
+								},
+								"description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "PUT",
+					"item": [
+						{
+							"name": "Update clients - Duplicate CUIT",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+											"",
+											"pm.test(\"CUIT - duplicated\", function () {",
+											"    const response = pm.response.json();",
+											"    pm.expect(response.errors).to.include(\"CUIT Duplicado.\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"cuit\": \"99-17252802-k\",\n    \"email\": \"juan.perez.arriba@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Avenida Siempre Viva 456\",\n    \"balance\": \"15230.75\",\n    \"is_active\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/{{client_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"{{client_id}}"
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update clients - Duplicate EMAIL",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 409\", () => pm.response.to.have.status(409));",
+											"",
+											"pm.test(\"Email duplicated\", function () {",
+											"    const response = pm.response.json();",
+											"    pm.expect(response.errors).to.include(\"EMAIL Duplicado.\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"cuit\": \"99-17252802-6\",\n    \"email\": \"felipeossss@felipeolivos.cl\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Avenida Siempre Viva 456\",\n    \"balance\": \"15230.75\",\n    \"is_active\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/{{client_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"{{client_id}}"
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update clients - Not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404 - Cliente no encontrado\", ()=> pm.response.to.have.status(404));",
+											"",
+											"pm.test(\"Response Content-Type is HTML\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\");",
+											"});",
+											"",
+											"pm.test(\"Responde body contains 'Not Found'\", function () {",
+											"    const responseBody = pm.response.text();",
+											"    pm.expect(responseBody).to.include(\"404\");",
+											"    pm.expect(responseBody).to.include(\"Not Found\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Juan Pérez Actualizado\",\n    \"cuit\": \"20-12345678-9\",\n    \"email\": \"juan.perez@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Avenida Siempre Viva 456\",\n    \"balance\": \"15230.75\",\n    \"is_active\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"1"
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Update clients - Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful PUT request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+											"});",
+											"",
+											"const response = pm.response.json();",
+											"pm.test(\"Name was updated - Address was updated\", function () {",
+											"    pm.expect(response.name).to.eql(\"Juan Pérez Actualizado\");",
+											"    pm.expect(response.address).to.eql(\"Avenida Siempre Viva 456\");",
+											"});",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Juan Pérez Actualizado\",\n    \"cuit\": \"21-12345678-0\",\n    \"email\": \"juan.perez.actualizado@example.com\",\n    \"phone\": \"+54 9 11 1234-5678\",\n    \"address\": \"Avenida Siempre Viva 456\",\n    \"balance\": \"15230.75\",\n    \"is_active\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/{{client_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"{{client_id}}"
+									]
+								},
+								"description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "DELETE",
+					"item": [
+						{
+							"name": "Delete clients - Not found",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status 404\", () => pm.response.to.have.status(404));",
+											"",
+											"pm.test(\"Response Content-Type is HTML\", function () {",
+											"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/html\");",
+											"});",
+											"",
+											"pm.test(\"Responde body contains '404' | 'Not Found'\", function () {",
+											"    const responseBody = pm.response.text();",
+											"    pm.expect(responseBody).to.include(\"404\");",
+											"    pm.expect(responseBody).to.include(\"Not Found\");",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/1",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"1"
+									]
+								},
+								"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+							},
+							"response": []
+						},
+						{
+							"name": "Delete clients - Success",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Successful DELETE request\", function () {",
+											"    pm.response.to.have.status(204);",
+											"});",
+											"",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{jwt_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/api/clients/{{client_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"api",
+										"clients",
+										"{{client_id}}"
+									]
+								},
+								"description": "This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code."
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1",
+			"disabled": true
+		},
+		{
+			"key": "base_url",
+			"value": "https://api-tester-adl.leonardojose.dev"
+		}
+	]
+}

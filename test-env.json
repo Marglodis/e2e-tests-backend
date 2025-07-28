@@ -1,0 +1,33 @@
+{
+	"id": "40bd9737-06ec-4542-8ac4-2859f8a4aea3",
+	"name": "E2E Backend Tests - ADL",
+	"values": [
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "client_id",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "clien",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "__uuid",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2025-07-28T21:16:09.996Z",
+	"_postman_exported_using": "Postman/11.56.0"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "proyecto-final-automation-testing-adl",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run \"E2E_Backend_Tests.json\" -e \"test-env.json\" --reporters htmlextra --reporter-htmlextra-export report.html"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "newman-reporter-htmlextra": "^1.23.1"
+  }
+}
