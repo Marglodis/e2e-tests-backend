@@ -12,7 +12,7 @@ Este repositorio contiene pruebas End-to-End (E2E) automatizadas para validar la
 1. Clona el repositorio:
 
    ```bash
-   git clone https://github.com/tu-usuario/e2e-tests-backend.git
+   git clone https://github.com/Marglodis/e2e-tests-backend
    cd e2e-tests-backend
 
 2. Instala las dependencias
@@ -35,7 +35,6 @@ Este repositorio contiene pruebas End-to-End (E2E) automatizadas para validar la
     - Ejecuta la colección completa.
     - Genera un informe detallado en report.html.
 
-4. Abre el informe con tu navegador:
+4. Abre el informe generado en la carpeta raiz con tu navegador:
 
-    ```bash
-    open report.html
+    - report.html
